@@ -9,6 +9,8 @@ I often find myself lost within my own notes to get a grip from this language, e
 
 ---
 
+# Model Details
+
 ## About the model
 **PAST-2** comes from **PT-AN** (Portuguese to Angrarosskesk) **Seq2Seq** (Sequence to Sequence encoding-decoding algorithm-based) **Transformer** (it's not a RNN, although pretty similar, and neither a CNN, even if it's also pretty similar, it relies on transformer-based algorithms) **Translator** (you already know it) and **2** (because of the two S and T in Seq2Seq and Transformer-Translator, just a nice touch).
 
