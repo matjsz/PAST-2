@@ -29,7 +29,7 @@ Still don't know it. WIP.
 
 ## Training Data
 
-The model is going to be trained based on my own dataset (nobody whave a PT-AN dataset available, sadly), which will be available at HuggingFace Hub at **matjs/pt_to_an**.
+The model is going to be trained based on my own dataset (nobody have a PT-AN dataset available, sadly), which will be available at HuggingFace Hub at **matjs/pt_to_an**.
 
 ## Training Procedure
 
