@@ -47,13 +47,13 @@ The model involves a training procedure that brings together the approaches used
 - **Translate it!**
 
 # Evaluation
-Still no one. WIP.
+Still none. WIP.
 
 ## Testing Data, Factors & Metrics
-Still no one. WIP.
+Still none. WIP.
 
 ## Results
-Still no one. WIP.
+Still none. WIP.
 
 ## Environmental Impact
 - **Hardware Type:** AWS EC2 Cloud GPU Instancing
