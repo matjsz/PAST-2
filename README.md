@@ -59,7 +59,7 @@ Still no one. WIP.
 - **Hardware Type:** AWS EC2 Cloud GPU Instancing
 - **Hours used:** WIP 
 - **Cloud Provider:** AWS
-- **Compute Region:** Brazil
+- **Compute Region:** BR/São Paulo
 - **Carbon Emitted:** Carbon emissions can be estimated using the Machine Learning Impact calculator presented in Lacoste et al. (2019).
 
 # Citation
