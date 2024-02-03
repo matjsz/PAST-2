@@ -32,6 +32,9 @@
     "dela": "rev",
     "meu": "myurv",
 
+    "o": "da",
+    "a": "da",
+
     "e": "ant",
     "ou": "ot",
     "de": "av",
@@ -40,6 +43,10 @@
     "que": "vat",
     "mas": "brat",
     "nem": "nivoy",
+    "isso": "vit",
+    "nisso": "ovit",
+    "tão": "zo",
+    "então": "zo",
 
     "um": "ona",
     "uma": "ona",
@@ -118,7 +125,24 @@
     "lerá": "ridatav",
     "leria": "ridatezh",
 
+    "acha": "vand",
+    "achar": "vand",
+    "achando": "vanda",
+    "achou": "vandet",
+    "achará": "vandav",
+    "acharia": "vandezh",
+
+    "ouve": "riar",
+    "ouvir": "riar",
+    "ouvindo": "riara",
+    "ouviu": "riaret",
+    "ouvirá": "riarav",
+    "ouviria": "riarzh",
+
     "amanhã": "tovarov",
+    "ontem": "ixhtarov",
+    "antes": "vifor",
+    "depois": "ovtar",
     "chuva": "rany",
     "maravilha": "vantezha",
     "capítulo": "xhapit",
@@ -135,6 +159,13 @@
     "figura": "frigav",
     "conversa": "tok",
     "diálogo": "tok",
-    "isso": "vit",
-    "nisso": "ovit"
+    "extraordinário": "ekhxhtarodner",
+    "fora": "okt",
+    "normal": "normal",
+    "problema": "probezhanmit",
+    "manhã": "varov",
+    "sucedeu": "xhakvidet",
+    "dia": "dhate",
+    "cansativo": "toirevata",
+    "fatídico": "toirevata"
 }
