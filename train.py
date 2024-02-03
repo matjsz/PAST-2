@@ -1,48 +1,80 @@
-import pandas as pd
-from tensorflow.keras.layers import Input, LSTM, Dense, Embedding, Bidirectional
-from tensorflow.keras.models import Model
-from transformers import AutoTokenizer
 import tensorflow as tf
+import numpy as np
+import pickle
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# Load your TSV dataset
-df = pd.read_csv("dataset/train.tsv", sep="\t", header=None, names=["Portuguese", "Angrarosskesh"])
+# Sample data for the first tests
+data = """É um dia bonito.\tEixh daita krasiyvo.
+Das cinzas, pois, foi nascido o humano\tVroet doista, forva, vatexh bruanivet manvek
+Poema do principío\tPrinkipaxhpoemet
+Poema\tPoemet
+Princípio\tPrinkipaxh
+Eu fui ao parque\tIg puenxhet ov park
+O ser humano é incrível\tDa manvek eixh inveratvy
+Ele disse que faria isso\tRivmy parosket ev doatezh vit
+Atirei nele, sim\tXhotet ov rivmy, iaxh
+Vai chover amanhã\tEixhetav rany tovarov
+Alice no País das Maravilhas\tAlice ov Naskan av Vantezhap
+Lewis Carroll\tLewis Carroll
+Capítulo I Descendo a Toca do Coelho\tXhapit I Dova ov Huta av Rovit
+Alice estava começando a ficar muito cansada de sentar-se ao lado de sua irmã no banco e de não ter nada para fazer: uma ou duas vezes havia espiado o livro que a irmã estava lendo, mas não havia imagens nem diálogos nele.\tAlice eixhet vegheva ov veire toirev av xhit ov xhade ov yurv xhista ov xhitprank ant noy hat notanv vo doy: ona ot doa tomap xhetet ixhpatet vat yurv xhista eixhet rida, brat noy eixhet frigavap nivoy tokep ovit.
+Não havia nada de tão extraordinário nisso; nem Alice achou assim tão fora do normal ouvir o Coelho\tNoy eixhet notanv av zo ekhxhtarodner ovit; noy Alice vandet zo okt av normal riar da rovit
+Eu tive um problema na manhã que se sucedeu ao dia anterior fatídico\tYg hatet ona probezhamit ov varov vat xhakvidet da toirevata dhate vifor
+"""
 
-# Split into train and validation sets
-train_size = int(0.8 * len(df))
-train_df, val_df = df[:train_size], df[train_size:]
+pairs = [line.split('\t') for line in data.split('\n') if line]
+source_sentences, target_sentences = zip(*pairs)
 
-tokenizer = AutoTokenizer.from_pretrained("bert-base-multilingual-cased")
+source_tokenizer = Tokenizer(filters='')
+source_tokenizer.fit_on_texts(source_sentences)
+source_vocab_size = len(source_tokenizer.word_index) + 1
 
-# Define input and output sequences
-input_seq = Input(shape=(None,))
-target_seq = Input(shape=(None,))
+target_tokenizer = Tokenizer(filters='')
+target_tokenizer.fit_on_texts(target_sentences)
+target_vocab_size = len(target_tokenizer.word_index) + 1
 
-# Embedding layer (you can replace this with pre-trained embeddings)
-embedding_dim = 128
-vocab_size = 10000  # Replace with your actual vocabulary size
-embedding_layer = Embedding(input_dim=vocab_size, output_dim=embedding_dim)
+with open('source_tokenizer.pkl', 'wb') as source_file:
+    pickle.dump(source_tokenizer, source_file)
 
-# Encode input sequence
-encoder = Bidirectional(LSTM(256, return_state=True))
-encoder_output, forward_h, forward_c, backward_h, backward_c = encoder(embedding_layer(input_seq))
-state_h = tf.keras.layers.Concatenate()([forward_h, backward_h])
-state_c = tf.keras.layers.Concatenate()([forward_c, backward_c])
+with open('target_tokenizer.pkl', 'wb') as target_file:
+    pickle.dump(target_tokenizer, target_file)
 
-# Decode sequence
-decoder = LSTM(256, return_sequences=True, return_state=True)
-decoder_output, _, _ = decoder(embedding_layer(target_seq), initial_state=[state_h, state_c])
+source_sequences = source_tokenizer.texts_to_sequences(source_sentences)
+target_sequences = target_tokenizer.texts_to_sequences(target_sentences)
 
-# Output layer
-output_layer = Dense(vocab_size, activation="softmax")
-output = output_layer(decoder_output)
+source_padded = pad_sequences(source_sequences)
+max_source_length = source_padded.shape[1]
+print(max_source_length)
+target_padded = pad_sequences(target_sequences, padding='post')
 
-# Create the model
-model = Model([input_seq, target_seq], output)
-model.compile(optimizer="adam", loss="sparse_categorical_crossentropy")
+def train():
+    embedding_dim = 256
+    units = 512
 
-# Tokenize and convert to input IDs
-train_input = tokenizer(train_df["Portuguese"].tolist(), padding=True, truncation=True, return_tensors="tf")
-train_target = tokenizer(train_df["Angrarosskesh"].tolist(), padding=True, truncation=True, return_tensors="tf")
+    encoder_inputs = tf.keras.layers.Input(shape=(None,))
+    encoder_embedding = tf.keras.layers.Embedding(source_vocab_size, embedding_dim)(encoder_inputs)
+    encoder_lstm = tf.keras.layers.LSTM(units, return_state=True)
+    encoder_outputs, state_h, state_c = encoder_lstm(encoder_embedding)
+    encoder_states = [state_h, state_c]
 
-# # Train the model
-model.fit([train_input["input_ids"], train_target["input_ids"]], train_target["input_ids"], epochs=10, batch_size=64)
+    decoder_inputs = tf.keras.layers.Input(shape=(None,))
+    decoder_embedding = tf.keras.layers.Embedding(target_vocab_size, embedding_dim)(decoder_inputs)
+    decoder_lstm = tf.keras.layers.LSTM(units, return_sequences=True, return_state=True)
+    decoder_outputs, _, _ = decoder_lstm(decoder_embedding, initial_state=encoder_states)
+
+    decoder_dense = tf.keras.layers.Dense(target_vocab_size, activation='softmax')
+    outputs = decoder_dense(decoder_outputs)
+
+    model = tf.keras.models.Model([encoder_inputs, decoder_inputs], outputs)
+
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+    model.fit([source_padded, target_padded[:, :-1]], target_padded[:, 1:], epochs=11, batch_size=64, validation_split=0.2)
+
+    model.evaluate([source_padded, target_padded[:, :-1]], target_padded[:, 1:])
+
+    model.save('PAST-2.keras')
+
+train()
+
